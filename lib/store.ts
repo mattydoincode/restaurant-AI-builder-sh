@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { arrayMove } from "@dnd-kit/sortable";
 import {
   RestaurantData,
   SCHEMA_VERSION,
@@ -33,6 +34,13 @@ interface StoreState {
     patch: Partial<MenuItem>,
   ) => void;
   removeMenuItem: (sectionId: string, itemId: string) => void;
+
+  reorderMenuSections: (fromIndex: number, toIndex: number) => void;
+  reorderMenuItems: (
+    sectionId: string,
+    fromIndex: number,
+    toIndex: number,
+  ) => void;
 }
 
 function applyPatch<T>(prev: T, patch: Patch<T>): T {
@@ -143,6 +151,42 @@ export const useStore = create<StoreState>()(
                 ? { ...s, items: s.items.filter((i) => i.id !== itemId) }
                 : s,
             ),
+          },
+        });
+      },
+
+      reorderMenuSections: (fromIndex, toIndex) => {
+        const menu = get().data.menu;
+        if (
+          fromIndex === toIndex ||
+          fromIndex < 0 ||
+          toIndex < 0 ||
+          fromIndex >= menu.length ||
+          toIndex >= menu.length
+        ) {
+          return;
+        }
+        set({
+          data: { ...get().data, menu: arrayMove(menu, fromIndex, toIndex) },
+        });
+      },
+      reorderMenuItems: (sectionId, fromIndex, toIndex) => {
+        if (fromIndex === toIndex) return;
+        set({
+          data: {
+            ...get().data,
+            menu: get().data.menu.map((s) => {
+              if (s.id !== sectionId) return s;
+              if (
+                fromIndex < 0 ||
+                toIndex < 0 ||
+                fromIndex >= s.items.length ||
+                toIndex >= s.items.length
+              ) {
+                return s;
+              }
+              return { ...s, items: arrayMove(s.items, fromIndex, toIndex) };
+            }),
           },
         });
       },
