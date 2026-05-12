@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-display: "Playfair Display", Georgia, serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #fafaf9;
+  color: #1c1917;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  border-color: rgb(231 229 228);
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(214 211 209);
+    border-radius: 3px;
+  }
+}
+
+/* Theme: Modern Bistro */
+.theme-modernBistro {
+  --t-bg: #0f0f0e;
+  --t-fg: #f5f5f4;
+  --t-muted: #a8a29e;
+  --t-accent: #d4af37;
+  --t-card: #1c1c1b;
+  --t-border: #292524;
+  --t-font-display: "Playfair Display", Georgia, serif;
+  --t-font-body: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Theme: Cozy Cafe */
+.theme-cozyCafe {
+  --t-bg: #fdf8f3;
+  --t-fg: #2c1810;
+  --t-muted: #78716c;
+  --t-accent: #c2410c;
+  --t-card: #ffffff;
+  --t-border: #f5e6d3;
+  --t-font-display: "Georgia", serif;
+  --t-font-body: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Theme: Sunny Coastal */
+.theme-sunnyCoastal {
+  --t-bg: #f0f9ff;
+  --t-fg: #0c2231;
+  --t-muted: #475569;
+  --t-accent: #0ea5e9;
+  --t-card: #ffffff;
+  --t-border: #bae6fd;
+  --t-font-display: "Georgia", serif;
+  --t-font-body: ui-sans-serif, system-ui, sans-serif;
+}
