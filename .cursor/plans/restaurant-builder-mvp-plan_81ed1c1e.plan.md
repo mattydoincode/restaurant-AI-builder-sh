@@ -22,7 +22,7 @@ todos:
     status: completed
   - id: instructions
     content: Write concise instructions.md (build/run, env vars, port, try-this) and ship final commit before the 2-hour deadline
-    status: in_progress
+    status: completed
 isProject: false
 ---
 
