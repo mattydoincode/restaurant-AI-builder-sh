@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useResolvedImage } from "@/lib/useResolvedImage";
 
 interface SafeImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -17,9 +18,23 @@ export function SafeImg({
   fallbackClassName,
   ...props
 }: SafeImgProps) {
-  const [errored, setErrored] = useState(false);
+  const resolved = useResolvedImage(src);
+  const [imgError, setImgError] = useState(false);
 
-  if (!src || errored) {
+  if (resolved.loading) {
+    return (
+      <div
+        className={cn(
+          "animate-pulse bg-stone-200/50",
+          fallbackClassName ?? className,
+        )}
+        aria-label={alt}
+        aria-busy="true"
+      />
+    );
+  }
+
+  if (!resolved.url || resolved.error || imgError) {
     return (
       <div
         className={cn(
@@ -36,10 +51,10 @@ export function SafeImg({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={src}
+      src={resolved.url}
       alt={alt}
       className={className}
-      onError={() => setErrored(true)}
+      onError={() => setImgError(true)}
       {...props}
     />
   );

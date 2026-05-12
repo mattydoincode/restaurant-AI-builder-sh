@@ -1,13 +1,23 @@
 "use client";
 
-import type { RestaurantData } from "@/lib/schema";
+import type { MenuItem, RestaurantData } from "@/lib/schema";
 import { SafeImg } from "../SafeImg";
+import { MenuList, dishCardClass } from "../MenuList";
 import { formatTime, formatPrice } from "@/lib/utils";
-import { Instagram, MapPin, Phone, Mail } from "lucide-react";
+import { Instagram, MapPin, Phone, Mail, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function ModernBistro({ data }: { data: RestaurantData }) {
+interface ModernBistroProps {
+  data: RestaurantData;
+  onDishClick?: (id: string) => void;
+}
+
+export function ModernBistro({ data, onDishClick }: ModernBistroProps) {
   return (
-    <div className="theme-modernBistro bg-[var(--t-bg)] text-[var(--t-fg)] min-h-full">
+    <div
+      className="bg-[var(--t-bg)] text-[var(--t-fg)] min-h-full"
+      style={{ fontFamily: "var(--t-font-body)" }}
+    >
       {/* Hero */}
       <section className="relative">
         <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
@@ -71,51 +81,20 @@ export function ModernBistro({ data }: { data: RestaurantData }) {
             <div className="space-y-12">
               {data.menu.map((section) => (
                 <div key={section.id}>
-                  <h3
-                    className="text-xs uppercase tracking-[0.3em] text-[var(--t-accent)] mb-6 text-center"
-                  >
+                  <h3 className="text-xs uppercase tracking-[0.3em] text-[var(--t-accent)] mb-6 text-center">
                     {section.name}
                   </h3>
-                  <div className="space-y-5">
+                  <MenuList>
                     {section.items.map((item) => (
-                      <div
+                      <ModernBistroDishCard
                         key={item.id}
-                        className="flex justify-between items-baseline gap-4 pb-4 border-b border-[var(--t-border)] last:border-b-0"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline gap-2 flex-wrap">
-                            <h4
-                              className="font-medium"
-                              style={{ fontFamily: "var(--t-font-display)" }}
-                            >
-                              {item.name}
-                            </h4>
-                            {item.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-[10px] px-1.5 py-0.5 border border-[var(--t-border)] text-[var(--t-muted)]"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                          {item.description && (
-                            <p className="text-sm text-[var(--t-muted)] mt-1 italic">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                        {item.price && (
-                          <span
-                            className="text-[var(--t-accent)] font-medium tabular-nums"
-                            style={{ fontFamily: "var(--t-font-display)" }}
-                          >
-                            {formatPrice(item.price)}
-                          </span>
-                        )}
-                      </div>
+                        item={item}
+                        onClick={
+                          onDishClick ? () => onDishClick(item.id) : undefined
+                        }
+                      />
                     ))}
-                  </div>
+                  </MenuList>
                 </div>
               ))}
             </div>
@@ -128,9 +107,7 @@ export function ModernBistro({ data }: { data: RestaurantData }) {
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12">
           {data.hours.length > 0 && (
             <div>
-              <h3
-                className="text-xs uppercase tracking-[0.3em] text-[var(--t-accent)] mb-6"
-              >
+              <h3 className="text-xs uppercase tracking-[0.3em] text-[var(--t-accent)] mb-6">
                 Hours
               </h3>
               <dl className="space-y-2">
@@ -139,9 +116,7 @@ export function ModernBistro({ data }: { data: RestaurantData }) {
                     key={h.day}
                     className="flex justify-between text-sm border-b border-[var(--t-border)] pb-2"
                   >
-                    <dt className="text-[var(--t-fg)] font-medium">
-                      {h.day}
-                    </dt>
+                    <dt className="text-[var(--t-fg)] font-medium">{h.day}</dt>
                     <dd className="text-[var(--t-muted)] tabular-nums">
                       {h.closed
                         ? "Closed"
@@ -158,9 +133,7 @@ export function ModernBistro({ data }: { data: RestaurantData }) {
             data.contact.email ||
             data.contact.instagram) && (
             <div>
-              <h3
-                className="text-xs uppercase tracking-[0.3em] text-[var(--t-accent)] mb-6"
-              >
+              <h3 className="text-xs uppercase tracking-[0.3em] text-[var(--t-accent)] mb-6">
                 Visit Us
               </h3>
               <ul className="space-y-3 text-sm">
@@ -210,13 +183,81 @@ export function ModernBistro({ data }: { data: RestaurantData }) {
 
       {/* Footer */}
       <footer className="border-t border-[var(--t-border)] py-8 px-6 text-center">
-        <p
-          className="text-xs uppercase tracking-[0.3em] text-[var(--t-muted)]"
-        >
-          {data.name || "Restaurant"} ·{" "}
-          {new Date().getFullYear()}
+        <p className="text-xs uppercase tracking-[0.3em] text-[var(--t-muted)]">
+          {data.name || "Restaurant"} · {new Date().getFullYear()}
         </p>
       </footer>
     </div>
+  );
+}
+
+function ModernBistroDishCard({
+  item,
+  onClick,
+}: {
+  item: MenuItem;
+  onClick?: () => void;
+}) {
+  const interactive = Boolean(onClick);
+  const Comp = (interactive ? "button" : "div") as "button" | "div";
+
+  return (
+    <Comp
+      type={interactive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        dishCardClass,
+        "flex items-start gap-4 text-left pb-4 border-b border-[var(--t-border)] last:border-b-0 max-md:bg-[var(--t-card)] max-md:border max-md:rounded-lg max-md:p-3 w-full",
+        interactive &&
+          "group cursor-pointer transition-colors hover:text-[var(--t-accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--t-accent)]",
+      )}
+    >
+      {item.imageUrl && (
+        <SafeImg
+          src={item.imageUrl}
+          alt={item.name}
+          className="w-20 h-20 md:w-24 md:h-24 object-cover rounded flex-shrink-0"
+          fallbackClassName="w-20 h-20 md:w-24 md:h-24 rounded flex-shrink-0"
+        />
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-baseline gap-3">
+          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+            <h4
+              className="font-medium"
+              style={{ fontFamily: "var(--t-font-display)" }}
+            >
+              {item.name}
+            </h4>
+            {item.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-[10px] px-1.5 py-0.5 border border-[var(--t-border)] text-[var(--t-muted)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          {item.price && (
+            <span
+              className="text-[var(--t-accent)] font-medium tabular-nums flex-shrink-0"
+              style={{ fontFamily: "var(--t-font-display)" }}
+            >
+              {formatPrice(item.price)}
+            </span>
+          )}
+        </div>
+        {item.description && (
+          <p className="text-sm text-[var(--t-muted)] mt-1 italic">
+            {item.description}
+          </p>
+        )}
+        {interactive && (
+          <span className="hidden md:inline-flex items-center gap-1 mt-1 text-xs text-[var(--t-accent)] opacity-0 group-hover:opacity-100 transition-opacity">
+            View details <ChevronRight className="h-3 w-3" />
+          </span>
+        )}
+      </div>
+    </Comp>
   );
 }

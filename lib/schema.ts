@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const DIETARY_TAGS = ["V", "VG", "GF", "DF", "Spicy"] as const;
 export const DietaryTag = z.enum(DIETARY_TAGS);
@@ -11,8 +11,43 @@ export const PriceLevel = z.enum(PRICE_LEVELS);
 export type PriceLevel = z.infer<typeof PriceLevel>;
 
 export const THEMES = ["modernBistro", "cozyCafe", "sunnyCoastal"] as const;
-export const Theme = z.enum(THEMES);
-export type Theme = z.infer<typeof Theme>;
+export const ThemePreset = z.enum(THEMES);
+export type ThemePreset = z.infer<typeof ThemePreset>;
+
+export const THEME_MODES = ["light", "dark"] as const;
+export const ThemeMode = z.enum(THEME_MODES);
+export type ThemeMode = z.infer<typeof ThemeMode>;
+
+export const ThemeColors = z.object({
+  primary: z.string().optional(),
+  secondary: z.string().optional(),
+  background: z.string().optional(),
+  foreground: z.string().optional(),
+});
+export type ThemeColors = z.infer<typeof ThemeColors>;
+
+export const ThemeConfig = z.object({
+  preset: ThemePreset.default("modernBistro"),
+  mode: ThemeMode.default("light"),
+  colors: ThemeColors.default({}),
+});
+export type ThemeConfig = z.infer<typeof ThemeConfig>;
+
+/**
+ * Accepts the new ThemeConfig OR the legacy string enum (back-compat for
+ * existing localStorage payloads). Always emits a ThemeConfig.
+ */
+export const ThemeField = z.preprocess((v) => {
+  if (typeof v === "string") {
+    const valid = THEMES.includes(v as ThemePreset);
+    return {
+      preset: valid ? v : "modernBistro",
+      mode: v === "modernBistro" ? "dark" : "light",
+      colors: {},
+    };
+  }
+  return v;
+}, ThemeConfig);
 
 export const DAYS = [
   "Mon",
@@ -32,6 +67,9 @@ export const MenuItem = z.object({
   description: z.string().default(""),
   price: z.string().default(""),
   tags: z.array(DietaryTag).default([]),
+  imageUrl: z.string().default(""),
+  gallery: z.array(z.string()).max(6).default([]),
+  chef: z.string().default(""),
 });
 export type MenuItem = z.infer<typeof MenuItem>;
 
@@ -76,7 +114,12 @@ export const RestaurantData = z.object({
     mapsUrl: "",
     instagram: "",
   }),
-  theme: Theme.default("modernBistro"),
+  theme: ThemeField.default({
+    preset: "modernBistro",
+    mode: "dark",
+    colors: {},
+  }),
+  recentImageUrls: z.array(z.string()).max(20).default([]),
 });
 export type RestaurantData = z.infer<typeof RestaurantData>;
 

@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { useStore, useStoreHydrated } from "@/lib/store";
+import { useAIEnabled } from "@/lib/useAIEnabled";
 import { HeroEditor } from "./HeroEditor";
 import { AboutEditor } from "./AboutEditor";
 import { MenuEditor } from "./MenuEditor";
@@ -23,17 +24,6 @@ import { ThemePicker } from "./ThemePicker";
 import { AIOnboardingDialog } from "./AIOnboardingDialog";
 import { PreviewFrame } from "@/components/preview/PreviewFrame";
 import { cn } from "@/lib/utils";
-
-function useAIEnabled() {
-  const [enabled, setEnabled] = useState(false);
-  useEffect(() => {
-    fetch("/api/ai/health")
-      .then((r) => r.json())
-      .then((d) => setEnabled(Boolean(d.enabled)))
-      .catch(() => setEnabled(false));
-  }, []);
-  return enabled;
-}
 
 export function EditorShell() {
   const data = useStore((s) => s.data);

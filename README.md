@@ -2,8 +2,6 @@
 
 An opinionated, AI-assisted website builder for restaurant owners. Edit on the left, see your site on the right. Pick a theme. Publish by sharing the screen.
 
-Built as a 2-hour MVP for the Ethena home challenge.
-
 ## What it does
 
 - **AI onboarding** - describe your concept and get a fully populated draft in seconds (cuisine, vibe, city -> name, tagline, story, menu, hours, contact).

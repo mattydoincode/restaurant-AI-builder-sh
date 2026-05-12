@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Smartphone, Monitor, Expand, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SitePreview } from "./SitePreview";
+import { SitePreview, type PreviewView } from "./SitePreview";
 import type { RestaurantData } from "@/lib/schema";
 
 interface PreviewFrameProps {
@@ -19,6 +19,16 @@ export function PreviewFrame({
   onFullscreenToggle,
 }: PreviewFrameProps) {
   const [viewport, setViewport] = useState<"mobile" | "desktop">("desktop");
+  const [view, setView] = useState<PreviewView>({ kind: "home" });
+
+  // If the dish we're viewing gets deleted, fall back to home.
+  useEffect(() => {
+    if (view.kind !== "dish") return;
+    const exists = data.menu.some((s) =>
+      s.items.some((i) => i.id === view.id),
+    );
+    if (!exists) setView({ kind: "home" });
+  }, [view, data.menu]);
 
   if (fullscreen) {
     return (
@@ -44,7 +54,7 @@ export function PreviewFrame({
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          <SitePreview data={data} />
+          <SitePreview data={data} view={view} onNavigate={setView} />
         </div>
       </div>
     );
@@ -85,6 +95,15 @@ export function PreviewFrame({
           <span className="text-xs text-stone-400 ml-2 hidden sm:block">
             Live preview
           </span>
+          {view.kind === "dish" && (
+            <button
+              type="button"
+              onClick={() => setView({ kind: "home" })}
+              className="ml-2 text-xs text-stone-500 hover:text-stone-800 underline underline-offset-2"
+            >
+              Return home
+            </button>
+          )}
         </div>
         <Button
           type="button"
@@ -104,7 +123,7 @@ export function PreviewFrame({
             viewport === "mobile" ? "max-w-[390px]" : "max-w-none",
           )}
         >
-          <SitePreview data={data} />
+          <SitePreview data={data} view={view} onNavigate={setView} />
         </div>
       </div>
     </div>

@@ -17,13 +17,17 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Plus, Trash2, GripVertical, ChevronRight } from "lucide-react";
+import { Plus, Trash2, GripVertical, ChevronRight, ImagePlus, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { DIETARY_TAGS, type MenuItem, type MenuSection } from "@/lib/schema";
 import { cn, formatPrice } from "@/lib/utils";
+import { SafeImg } from "@/components/preview/SafeImg";
+import { ImagePickerDialog } from "./ImagePickerDialog";
+import { AIAssistButton } from "./AIAssistButton";
 
 /**
  * True if the event originated from a real <button> descendant (the grip,
@@ -168,6 +172,11 @@ function SortableSection({ section }: { section: MenuSection }) {
           className="font-semibold border-transparent shadow-none hover:border-stone-200 focus-visible:border-stone-300 px-2"
           placeholder="Section name"
         />
+        <AIAssistButton
+          fieldKind="section_name"
+          current={section.name}
+          onResult={(value) => renameSection(section.id, value)}
+        />
         <Button
           type="button"
           variant="ghost"
@@ -224,6 +233,8 @@ function SortableItem({
   const updateItem = useStore((s) => s.updateMenuItem);
   const removeItem = useStore((s) => s.removeMenuItem);
   const [expanded, setExpanded] = useState(false);
+  const [primaryPickerOpen, setPrimaryPickerOpen] = useState(false);
+  const [galleryPickerOpen, setGalleryPickerOpen] = useState(false);
 
   const {
     attributes,
@@ -290,6 +301,14 @@ function SortableItem({
             expanded && "rotate-90",
           )}
         />
+        {item.imageUrl ? (
+          <SafeImg
+            src={item.imageUrl}
+            alt=""
+            className="h-7 w-7 rounded object-cover border border-stone-200 flex-shrink-0"
+            fallbackClassName="h-7 w-7 rounded border border-stone-200 flex-shrink-0"
+          />
+        ) : null}
         <span className="flex-1 min-w-0 text-sm font-medium text-stone-900 truncate">
           {displayName}
         </span>
@@ -324,7 +343,7 @@ function SortableItem({
       {/* Expanded edit body */}
       {expanded && (
         <div className="px-3 pb-3 pt-1 space-y-2 animate-fade-in border-t border-stone-100">
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 items-center">
             <Input
               value={item.name}
               onChange={(e) =>
@@ -333,6 +352,14 @@ function SortableItem({
               placeholder="Item name"
               className="flex-1"
               autoFocus
+            />
+            <AIAssistButton
+              fieldKind="dish_name"
+              current={item.name}
+              dishName={item.name}
+              onResult={(value) =>
+                updateItem(sectionId, item.id, { name: value })
+              }
             />
             <Input
               value={item.price}
@@ -343,17 +370,29 @@ function SortableItem({
               className="w-20"
             />
           </div>
-          <Textarea
-            value={item.description}
-            onChange={(e) =>
-              updateItem(sectionId, item.id, {
-                description: e.target.value,
-              })
-            }
-            placeholder="Description (ingredients, preparation)"
-            rows={2}
-            className="text-xs"
-          />
+          <div className="relative">
+            <Textarea
+              value={item.description}
+              onChange={(e) =>
+                updateItem(sectionId, item.id, {
+                  description: e.target.value,
+                })
+              }
+              placeholder="Description (ingredients, preparation)"
+              rows={2}
+              className="text-xs pr-8"
+            />
+            <div className="absolute top-1 right-1">
+              <AIAssistButton
+                fieldKind="dish_description"
+                current={item.description}
+                dishName={item.name}
+                onResult={(value) =>
+                  updateItem(sectionId, item.id, { description: value })
+                }
+              />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-1">
             {DIETARY_TAGS.map((tag) => {
               const active = item.tags.includes(tag);
@@ -380,8 +419,133 @@ function SortableItem({
               );
             })}
           </div>
+
+          <div className="pt-2 border-t border-stone-100 space-y-2">
+            <Label className="text-xs">Dish image</Label>
+            <div className="flex items-center gap-2">
+              {item.imageUrl ? (
+                <SafeImg
+                  src={item.imageUrl}
+                  alt={item.name}
+                  className="h-14 w-20 rounded object-cover border border-stone-200"
+                  fallbackClassName="h-14 w-20 rounded border border-stone-200"
+                />
+              ) : (
+                <div className="h-14 w-20 rounded border border-dashed border-stone-300 flex items-center justify-center text-stone-400">
+                  <ImagePlus className="h-4 w-4" />
+                </div>
+              )}
+              <div className="flex flex-col gap-1">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPrimaryPickerOpen(true)}
+                >
+                  {item.imageUrl ? "Change" : "Add image"}
+                </Button>
+                {item.imageUrl && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      updateItem(sectionId, item.id, { imageUrl: "" })
+                    }
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-xs">Chef (optional)</Label>
+            <div className="flex gap-1.5 items-center">
+              <Input
+                value={item.chef}
+                onChange={(e) =>
+                  updateItem(sectionId, item.id, { chef: e.target.value })
+                }
+                placeholder="e.g. Chef Marta Russo"
+                className="text-xs flex-1"
+              />
+              <AIAssistButton
+                fieldKind="chef"
+                current={item.chef}
+                dishName={item.name}
+                onResult={(value) =>
+                  updateItem(sectionId, item.id, { chef: value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">
+              Gallery ({item.gallery.length}/6)
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {item.gallery.map((src, idx) => (
+                <div key={`${src}-${idx}`} className="relative group">
+                  <SafeImg
+                    src={src}
+                    alt={`Gallery ${idx + 1}`}
+                    className="h-14 w-20 rounded object-cover border border-stone-200"
+                    fallbackClassName="h-14 w-20 rounded border border-stone-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateItem(sectionId, item.id, {
+                        gallery: item.gallery.filter((_, i) => i !== idx),
+                      })
+                    }
+                    className="absolute -top-1.5 -right-1.5 bg-white border border-stone-200 rounded-full p-0.5 shadow-sm text-stone-500 hover:text-red-600 transition-colors"
+                    aria-label="Remove gallery image"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              {item.gallery.length < 6 && (
+                <button
+                  type="button"
+                  onClick={() => setGalleryPickerOpen(true)}
+                  className="h-14 w-20 rounded border-2 border-dashed border-stone-300 text-stone-400 hover:border-brand-400 hover:text-brand-500 flex flex-col items-center justify-center gap-0.5 transition-colors"
+                  aria-label="Add gallery image"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  <span className="text-[10px] font-medium">Add</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
+
+      <ImagePickerDialog
+        open={primaryPickerOpen}
+        onOpenChange={setPrimaryPickerOpen}
+        value={item.imageUrl}
+        onSelect={(src) =>
+          updateItem(sectionId, item.id, { imageUrl: src })
+        }
+        title="Choose dish image"
+        tabs={["upload", "url"]}
+      />
+      <ImagePickerDialog
+        open={galleryPickerOpen}
+        onOpenChange={setGalleryPickerOpen}
+        onSelect={(src) =>
+          updateItem(sectionId, item.id, {
+            gallery: [...item.gallery, src].slice(0, 6),
+          })
+        }
+        title="Add gallery image"
+        tabs={["upload", "url"]}
+      />
     </div>
   );
 }

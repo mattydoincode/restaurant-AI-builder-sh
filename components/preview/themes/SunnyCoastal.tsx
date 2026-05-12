@@ -1,13 +1,23 @@
 "use client";
 
-import type { RestaurantData } from "@/lib/schema";
+import type { MenuItem, RestaurantData } from "@/lib/schema";
 import { SafeImg } from "../SafeImg";
+import { MenuList, dishCardClass } from "../MenuList";
 import { formatTime, formatPrice } from "@/lib/utils";
-import { Instagram, MapPin, Phone, Mail, Waves } from "lucide-react";
+import { Instagram, MapPin, Phone, Mail, Waves, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function SunnyCoastal({ data }: { data: RestaurantData }) {
+interface SunnyCoastalProps {
+  data: RestaurantData;
+  onDishClick?: (id: string) => void;
+}
+
+export function SunnyCoastal({ data, onDishClick }: SunnyCoastalProps) {
   return (
-    <div className="theme-sunnyCoastal bg-[var(--t-bg)] text-[var(--t-fg)] min-h-full">
+    <div
+      className="bg-[var(--t-bg)] text-[var(--t-fg)] min-h-full"
+      style={{ fontFamily: "var(--t-font-body)" }}
+    >
       <section className="relative overflow-hidden">
         <div className="relative h-[50vh] min-h-[360px] w-full">
           <SafeImg
@@ -71,38 +81,17 @@ export function SunnyCoastal({ data }: { data: RestaurantData }) {
                   >
                     {section.name}
                   </h3>
-                  <div className="space-y-3">
+                  <MenuList desktopGap="gap-3">
                     {section.items.map((item) => (
-                      <div
+                      <SunnyCoastalDishCard
                         key={item.id}
-                        className="rounded-xl bg-[var(--t-bg)] p-4 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex justify-between items-baseline gap-3">
-                          <div className="flex items-baseline gap-2 flex-wrap">
-                            <h4 className="font-semibold">{item.name}</h4>
-                            {item.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--t-accent)]/15 text-[var(--t-accent)]"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                          {item.price && (
-                            <span className="font-bold text-[var(--t-accent)] tabular-nums">
-                              {formatPrice(item.price)}
-                            </span>
-                          )}
-                        </div>
-                        {item.description && (
-                          <p className="text-sm text-[var(--t-muted)] mt-1">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
+                        item={item}
+                        onClick={
+                          onDishClick ? () => onDishClick(item.id) : undefined
+                        }
+                      />
                     ))}
-                  </div>
+                  </MenuList>
                 </div>
               ))}
             </div>
@@ -184,5 +173,70 @@ export function SunnyCoastal({ data }: { data: RestaurantData }) {
         </p>
       </footer>
     </div>
+  );
+}
+
+function SunnyCoastalDishCard({
+  item,
+  onClick,
+}: {
+  item: MenuItem;
+  onClick?: () => void;
+}) {
+  const interactive = Boolean(onClick);
+  const Comp = (interactive ? "button" : "div") as "button" | "div";
+
+  return (
+    <Comp
+      type={interactive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        dishCardClass,
+        "rounded-xl bg-[var(--t-bg)] overflow-hidden text-left w-full hover:shadow-md transition-shadow",
+        interactive &&
+          "group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--t-accent)]",
+      )}
+    >
+      <div className="flex items-stretch gap-4 p-3">
+        {item.imageUrl && (
+          <SafeImg
+            src={item.imageUrl}
+            alt={item.name}
+            className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+            fallbackClassName="w-24 h-24 rounded-lg flex-shrink-0"
+          />
+        )}
+        <div className="flex-1 min-w-0 py-1">
+          <div className="flex justify-between items-baseline gap-3">
+            <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+              <h4 className="font-semibold">{item.name}</h4>
+              {item.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--t-accent)]/15 text-[var(--t-accent)]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            {item.price && (
+              <span className="font-bold text-[var(--t-accent)] tabular-nums flex-shrink-0">
+                {formatPrice(item.price)}
+              </span>
+            )}
+          </div>
+          {item.description && (
+            <p className="text-sm text-[var(--t-muted)] mt-1">
+              {item.description}
+            </p>
+          )}
+          {interactive && (
+            <span className="inline-flex items-center gap-1 mt-2 text-xs text-[var(--t-accent)] opacity-70 group-hover:opacity-100 transition-opacity">
+              View details <ArrowRight className="h-3 w-3" />
+            </span>
+          )}
+        </div>
+      </div>
+    </Comp>
   );
 }

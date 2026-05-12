@@ -2,19 +2,20 @@
 
 import { useStore } from "@/lib/store";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { STOCK_HERO_IMAGES } from "@/lib/sample";
 import { PRICE_LEVELS } from "@/lib/schema";
 import { cn } from "@/lib/utils";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Pencil } from "lucide-react";
 import { useState } from "react";
+import { SafeImg } from "@/components/preview/SafeImg";
+import { ImagePickerDialog } from "./ImagePickerDialog";
+import { AIAssistButton } from "./AIAssistButton";
 
 export function HeroEditor() {
   const data = useStore((s) => s.data);
   const patch = useStore((s) => s.patch);
-  const [showStock, setShowStock] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -29,7 +30,16 @@ export function HeroEditor() {
       </div>
 
       <div>
-        <Label htmlFor="tagline">Tagline</Label>
+        <div className="flex items-center justify-between mb-1.5">
+          <Label htmlFor="tagline" className="mb-0">
+            Tagline
+          </Label>
+          <AIAssistButton
+            fieldKind="tagline"
+            current={data.tagline}
+            onResult={(value) => patch({ tagline: value })}
+          />
+        </div>
         <Input
           id="tagline"
           value={data.tagline}
@@ -71,52 +81,51 @@ export function HeroEditor() {
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <Label className="mb-0">Hero Image URL</Label>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowStock((v) => !v)}
-          >
-            <ImageIcon className="h-3.5 w-3.5" />
-            {showStock ? "Hide stock photos" : "Use stock photo"}
-          </Button>
-        </div>
-        <Input
-          value={data.heroImageUrl}
-          onChange={(e) => patch({ heroImageUrl: e.target.value })}
-          placeholder="https://images.unsplash.com/..."
-        />
-        {showStock && (
-          <div className="grid grid-cols-3 gap-2 mt-2 animate-fade-in">
-            {STOCK_HERO_IMAGES.map((url) => (
-              <button
-                key={url}
+        <Label className="mb-1.5 block">Hero Image</Label>
+        <div className="flex items-center gap-3">
+          {data.heroImageUrl ? (
+            <SafeImg
+              src={data.heroImageUrl}
+              alt="Hero"
+              className="w-28 h-20 object-cover rounded-md border border-stone-200"
+              fallbackClassName="w-28 h-20 rounded-md border border-stone-200"
+            />
+          ) : (
+            <div className="w-28 h-20 rounded-md border border-dashed border-stone-300 flex items-center justify-center text-stone-400">
+              <ImageIcon className="h-5 w-5" />
+            </div>
+          )}
+          <div className="flex flex-col gap-1.5">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPickerOpen(true)}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              {data.heroImageUrl ? "Change image" : "Choose image"}
+            </Button>
+            {data.heroImageUrl && (
+              <Button
                 type="button"
-                onClick={() => {
-                  patch({ heroImageUrl: url });
-                  setShowStock(false);
-                }}
-                className={cn(
-                  "relative aspect-video overflow-hidden rounded-md border-2 transition-colors",
-                  data.heroImageUrl === url
-                    ? "border-brand-500"
-                    : "border-transparent hover:border-stone-300",
-                )}
+                variant="ghost"
+                size="sm"
+                onClick={() => patch({ heroImageUrl: "" })}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt="Stock photo"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </button>
-            ))}
+                Remove
+              </Button>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      <ImagePickerDialog
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        value={data.heroImageUrl}
+        onSelect={(src) => patch({ heroImageUrl: src })}
+        title="Choose hero image"
+      />
     </div>
   );
 }

@@ -163,6 +163,9 @@ export async function POST(req: Request) {
         description: item.description,
         price: item.price,
         tags: item.tags,
+        imageUrl: "",
+        gallery: [],
+        chef: "",
       })),
     })),
     hours:
@@ -181,7 +184,8 @@ export async function POST(req: Request) {
       mapsUrl: "",
       instagram: ai.data.contact.instagram,
     },
-    theme: "modernBistro",
+    theme: { preset: "modernBistro", mode: "dark", colors: {} },
+    recentImageUrls: [],
   };
 
   const final = RestaurantData.safeParse(data);

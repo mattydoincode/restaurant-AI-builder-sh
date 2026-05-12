@@ -41,6 +41,8 @@ interface StoreState {
     fromIndex: number,
     toIndex: number,
   ) => void;
+
+  pushRecentImageUrl: (url: string) => void;
 }
 
 function applyPatch<T>(prev: T, patch: Patch<T>): T {
@@ -113,6 +115,9 @@ export const useStore = create<StoreState>()(
           description: item?.description ?? "",
           price: item?.price ?? "",
           tags: item?.tags ?? [],
+          imageUrl: item?.imageUrl ?? "",
+          gallery: item?.gallery ?? [],
+          chef: item?.chef ?? "",
         };
         set({
           data: {
@@ -188,6 +193,16 @@ export const useStore = create<StoreState>()(
               return { ...s, items: arrayMove(s.items, fromIndex, toIndex) };
             }),
           },
+        });
+      },
+
+      pushRecentImageUrl: (url) => {
+        const trimmed = url.trim();
+        if (!trimmed) return;
+        const current = get().data.recentImageUrls ?? [];
+        const deduped = [trimmed, ...current.filter((u) => u !== trimmed)];
+        set({
+          data: { ...get().data, recentImageUrls: deduped.slice(0, 20) },
         });
       },
     }),

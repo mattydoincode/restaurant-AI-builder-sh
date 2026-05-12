@@ -1,13 +1,23 @@
 "use client";
 
-import type { RestaurantData } from "@/lib/schema";
+import type { MenuItem, RestaurantData } from "@/lib/schema";
 import { SafeImg } from "../SafeImg";
+import { MenuList, dishCardClass } from "../MenuList";
 import { formatTime, formatPrice } from "@/lib/utils";
-import { Instagram, MapPin, Phone, Mail } from "lucide-react";
+import { Instagram, MapPin, Phone, Mail, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function CozyCafe({ data }: { data: RestaurantData }) {
+interface CozyCafeProps {
+  data: RestaurantData;
+  onDishClick?: (id: string) => void;
+}
+
+export function CozyCafe({ data, onDishClick }: CozyCafeProps) {
   return (
-    <div className="theme-cozyCafe bg-[var(--t-bg)] text-[var(--t-fg)] min-h-full">
+    <div
+      className="bg-[var(--t-bg)] text-[var(--t-fg)] min-h-full"
+      style={{ fontFamily: "var(--t-font-body)" }}
+    >
       {/* Top bar */}
       <header className="border-b border-[var(--t-border)] bg-[var(--t-card)] sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -77,35 +87,17 @@ export function CozyCafe({ data }: { data: RestaurantData }) {
                   >
                     {section.name}
                   </h3>
-                  <div className="space-y-4">
+                  <MenuList desktopGap="gap-4">
                     {section.items.map((item) => (
-                      <div key={item.id} className="group">
-                        <div className="flex justify-between items-baseline gap-3">
-                          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
-                            <h4 className="font-semibold">{item.name}</h4>
-                            {item.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--t-accent)]/10 text-[var(--t-accent)]"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                          {item.price && (
-                            <span className="font-bold text-[var(--t-accent)] tabular-nums flex-shrink-0">
-                              {formatPrice(item.price)}
-                            </span>
-                          )}
-                        </div>
-                        {item.description && (
-                          <p className="text-sm text-[var(--t-muted)] mt-1">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
+                      <CozyCafeDishCard
+                        key={item.id}
+                        item={item}
+                        onClick={
+                          onDishClick ? () => onDishClick(item.id) : undefined
+                        }
+                      />
                     ))}
-                  </div>
+                  </MenuList>
                 </div>
               ))}
             </div>
@@ -199,5 +191,68 @@ export function CozyCafe({ data }: { data: RestaurantData }) {
         </p>
       </footer>
     </div>
+  );
+}
+
+function CozyCafeDishCard({
+  item,
+  onClick,
+}: {
+  item: MenuItem;
+  onClick?: () => void;
+}) {
+  const interactive = Boolean(onClick);
+  const Comp = (interactive ? "button" : "div") as "button" | "div";
+
+  return (
+    <Comp
+      type={interactive ? "button" : undefined}
+      onClick={onClick}
+      className={cn(
+        dishCardClass,
+        "rounded-xl bg-[var(--t-bg)] ring-1 ring-[var(--t-border)] overflow-hidden text-left w-full",
+        interactive &&
+          "group cursor-pointer transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--t-accent)]",
+      )}
+    >
+      {item.imageUrl && (
+        <SafeImg
+          src={item.imageUrl}
+          alt={item.name}
+          className="w-full aspect-[16/10] object-cover"
+          fallbackClassName="w-full aspect-[16/10]"
+        />
+      )}
+      <div className="p-4">
+        <div className="flex justify-between items-baseline gap-3">
+          <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+            <h4 className="font-semibold">{item.name}</h4>
+            {item.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--t-accent)]/10 text-[var(--t-accent)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          {item.price && (
+            <span className="font-bold text-[var(--t-accent)] tabular-nums flex-shrink-0">
+              {formatPrice(item.price)}
+            </span>
+          )}
+        </div>
+        {item.description && (
+          <p className="text-sm text-[var(--t-muted)] mt-1">
+            {item.description}
+          </p>
+        )}
+        {interactive && (
+          <span className="inline-flex items-center gap-1 mt-2 text-xs text-[var(--t-accent)] opacity-70 group-hover:opacity-100 transition-opacity">
+            View details <ArrowRight className="h-3 w-3" />
+          </span>
+        )}
+      </div>
+    </Comp>
   );
 }

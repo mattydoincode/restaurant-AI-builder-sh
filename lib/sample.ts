@@ -26,6 +26,10 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
             "Creamy burrata, heirloom tomatoes, basil, aged balsamic",
           price: "$16",
           tags: ["V", "GF"],
+          imageUrl:
+            "https://images.unsplash.com/photo-1626200419199-391ae4be7a44?auto=format&fit=crop&w=800&q=80",
+          gallery: [],
+          chef: "",
         },
         {
           id: "i-2",
@@ -33,6 +37,10 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
           description: "House-made meatballs, San Marzano sauce, pecorino",
           price: "$14",
           tags: [],
+          imageUrl:
+            "https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=800&q=80",
+          gallery: [],
+          chef: "",
         },
       ],
     },
@@ -47,6 +55,13 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
             "San Marzano tomatoes, fior di latte, basil, extra virgin olive oil",
           price: "$18",
           tags: ["V"],
+          imageUrl:
+            "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=800&q=80",
+          gallery: [
+            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80",
+          ],
+          chef: "Marta Russo",
         },
         {
           id: "i-4",
@@ -54,6 +69,10 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
           description: "Tomato, fior di latte, spicy soppressata, chili oil",
           price: "$21",
           tags: ["Spicy"],
+          imageUrl:
+            "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=800&q=80",
+          gallery: [],
+          chef: "",
         },
         {
           id: "i-5",
@@ -62,6 +81,10 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
             "Wild mushrooms, truffle cream, fontina, thyme",
           price: "$24",
           tags: ["V"],
+          imageUrl:
+            "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=800&q=80",
+          gallery: [],
+          chef: "",
         },
       ],
     },
@@ -75,6 +98,10 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
           description: "Espresso-soaked ladyfingers, mascarpone, cocoa",
           price: "$11",
           tags: ["V"],
+          imageUrl:
+            "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80",
+          gallery: [],
+          chef: "",
         },
       ],
     },
@@ -95,7 +122,8 @@ export const SAMPLE_RESTAURANT: RestaurantData = {
     mapsUrl: "https://maps.google.com/?q=212+East+7th+Street+New+York",
     instagram: "@pizzerialina",
   },
-  theme: "modernBistro",
+  theme: { preset: "modernBistro", mode: "dark", colors: {} },
+  recentImageUrls: [],
 };
 
 export const STOCK_HERO_IMAGES = [
