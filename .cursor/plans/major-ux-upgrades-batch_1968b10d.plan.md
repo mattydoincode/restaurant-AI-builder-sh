@@ -28,7 +28,7 @@ todos:
     status: completed
   - id: verify
     content: Run npm run build, fix any type errors, manually verify image upload, mobile carousel swipe, dish detail navigation, AI rewrite, theme switching with custom colors, and reload persistence
-    status: in_progress
+    status: completed
 isProject: false
 ---
 
